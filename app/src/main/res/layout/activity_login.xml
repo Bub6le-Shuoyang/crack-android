@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -9,56 +10,76 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Monitor App"
-        android:textSize="28sp"
+        android:text="途安智巡"
+        android:textSize="36sp"
         android:textStyle="bold"
-        android:layout_marginBottom="32dp"/>
+        android:textColor="@color/primary_color"
+        android:layout_marginBottom="48dp"
+        android:letterSpacing="0.05"/>
 
-    <EditText
-        android:id="@+id/etEmail"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:startIconDrawable="@android:drawable/ic_dialog_email"
         android:hint="邮箱"
-        android:inputType="textEmailAddress"/>
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
 
-    <EditText
-        android:id="@+id/etPassword"
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etEmail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textEmailAddress"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="密码"
-        android:inputType="textPassword"
-        android:layout_marginTop="16dp"/>
+        app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
+        app:endIconMode="password_toggle"
+        android:layout_marginTop="16dp"
+        style="@style/Widget.Material3.TextInputLayout.OutlinedBox">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etPassword"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"/>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="56dp"
         android:text="登录"
-        android:layout_marginTop="24dp"/>
+        android:textSize="18sp"
+        android:layout_marginTop="32dp"
+        app:cornerRadius="12dp"
+        style="@style/Widget.Material3.Button"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="24dp">
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/tvRegister"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="注册账号"
-            android:textColor="@color/primary_color"/>
+            style="@style/Widget.Material3.Button.TextButton"/>
 
         <Space
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"/>
 
-        <TextView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/tvForgotPassword"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="忘记密码?"
-            android:textColor="@color/primary_color"/>
+            style="@style/Widget.Material3.Button.TextButton"/>
     </LinearLayout>
 </LinearLayout>
