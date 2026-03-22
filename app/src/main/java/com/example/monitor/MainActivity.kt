@@ -44,10 +44,11 @@ class MainActivity : AppCompatActivity() {
         }
 
         fabUpload.setOnClickListener {
-            // TODO: Implement image upload trigger
             val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
             if (currentFragment is ImagesFragment) {
                 currentFragment.triggerImageUpload()
+            } else if (currentFragment is VideosFragment) {
+                currentFragment.triggerVideoUpload()
             }
         }
     }

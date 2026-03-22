@@ -53,11 +53,33 @@ class ImageDetailActivity : AppCompatActivity() {
         }
 
         btnDetect.setOnClickListener {
-            // Placeholder for detection API call if needed later
-            Toast.makeText(this, "检测功能正在开发中", Toast.LENGTH_SHORT).show()
+            detectImage(progressBar, ivDetail, tvDetectionResult)
         }
 
         loadData(progressBar, ivDetail, tvDetectionResult)
+    }
+
+    private fun detectImage(progressBar: ProgressBar, ivDetail: ImageView, tvDetectionResult: TextView) {
+        progressBar.visibility = View.VISIBLE
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.apiService.detectBatch(com.example.monitor.network.DetectBatchRequest(listOf(imageId)))
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful) {
+                        Toast.makeText(this@ImageDetailActivity, "检测完成", Toast.LENGTH_SHORT).show()
+                        loadData(progressBar, ivDetail, tvDetectionResult)
+                    } else {
+                        progressBar.visibility = View.GONE
+                        Toast.makeText(this@ImageDetailActivity, "检测失败", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    progressBar.visibility = View.GONE
+                    Toast.makeText(this@ImageDetailActivity, "网络错误: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
 
     private fun loadData(progressBar: ProgressBar, ivDetail: ImageView, tvDetectionResult: TextView) {

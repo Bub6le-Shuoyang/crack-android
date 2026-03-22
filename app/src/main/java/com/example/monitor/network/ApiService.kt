@@ -55,4 +55,90 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Path("imageId") imageId: Long
     ): Response<ImageDetailResponse>
+
+    @POST("/api/file/batch-delete-images")
+    suspend fun batchDeleteImages(
+        @Header("Authorization") token: String,
+        @Body request: BatchDeleteRequest
+    ): Response<BatchDeleteResponse>
+
+    @POST("/model/detectBatch")
+    suspend fun detectBatch(
+        @Body request: DetectBatchRequest
+    ): Response<Map<String, List<DetectionResult>>>
+
+    @GET("/api/user/info")
+    suspend fun getUserInfo(
+        @Header("Authorization") token: String
+    ): Response<UserInfoResponse>
+
+    @POST("/api/user/update-profile")
+    suspend fun updateProfile(
+        @Header("Authorization") token: String,
+        @Body request: UpdateProfileRequest
+    ): Response<UpdateProfileResponse>
+
+    @Multipart
+    @POST("/api/user/update-avatar")
+    suspend fun updateAvatar(
+        @Header("Authorization") token: String,
+        @Part file: MultipartBody.Part
+    ): Response<AvatarUploadResponse>
+
+    @POST("/api/user/update-password")
+    suspend fun updatePassword(
+        @Header("Authorization") token: String,
+        @Body request: UpdatePasswordRequest
+    ): Response<BaseResponse>
+
+    @POST("/api/user/logout")
+    suspend fun logout(
+        @Header("Authorization") token: String
+    ): Response<BaseResponse>
+
+    @Multipart
+    @POST("/api/file/upload-video")
+    suspend fun uploadVideo(
+        @Header("Authorization") token: String,
+        @Part file: MultipartBody.Part,
+        @Part("description") description: RequestBody? = null,
+        @Part("generateCover") generateCover: RequestBody? = null
+    ): Response<VideoUploadResponse>
+
+    @GET("/api/file/list-videos")
+    suspend fun listVideos(
+        @Header("Authorization") token: String,
+        @Query("page") page: Int? = 1,
+        @Query("pageSize") pageSize: Int? = 10,
+        @Query("fileType") fileType: String? = null
+    ): Response<VideoListResponse>
+
+    @DELETE("/api/file/delete-video/{videoId}")
+    suspend fun deleteVideo(
+        @Header("Authorization") token: String,
+        @Path("videoId") videoId: Long
+    ): Response<BaseResponse>
+
+    @POST("/model/detectVideo/{videoId}")
+    suspend fun detectVideo(
+        @Path("videoId") videoId: Long
+    ): Response<BaseResponse>
+
+    @GET("/model/detectVideo/progress/{videoId}")
+    suspend fun getVideoProgress(
+        @Path("videoId") videoId: Long
+    ): Response<VideoProgressResponse>
+
+    @GET("/api/statistics/image-overview")
+    suspend fun getImageOverview(
+        @Header("Authorization") token: String
+    ): Response<ImageOverviewResponse>
+
+    @GET("/api/statistics/anomaly-type-distribution")
+    suspend fun getAnomalyTypeDistribution(
+        @Header("Authorization") token: String,
+        @Query("mediaType") mediaType: String? = "image",
+        @Query("startDate") startDate: String? = null,
+        @Query("endDate") endDate: String? = null
+    ): Response<AnomalyDistributionResponse>
 }

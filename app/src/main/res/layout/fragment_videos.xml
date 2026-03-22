@@ -17,7 +17,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="搜索图像名称"
+            android:hint="搜索视频名称"
             app:boxCornerRadiusTopStart="24dp"
             app:boxCornerRadiusTopEnd="24dp"
             app:boxCornerRadiusBottomStart="24dp"
@@ -40,59 +40,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:text="搜索" />
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/llBatchControls"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingBottom="8dp">
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnToggleSelect"
-            style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="批量操作" />
-
-        <HorizontalScrollView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:scrollbars="none">
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBatchDetect"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="批量检测"
-                    android:visibility="gone"
-                    android:layout_marginStart="8dp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBatchDelete"
-                    style="@style/Widget.Material3.Button.TonalButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="批量删除"
-                    app:backgroundTint="#FFEbee"
-                    app:strokeColor="#FFCDD2"
-                    android:textColor="#C62828"
-                    android:visibility="gone"
-                    android:layout_marginStart="8dp" />
-            </LinearLayout>
-        </HorizontalScrollView>
-
+            
         <ImageButton
             android:id="@+id/btnRefresh"
             android:layout_width="48dp"
@@ -128,7 +76,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:padding="8dp">
+        android:padding="8dp"
+        android:paddingBottom="80dp">
 
         <Button
             android:id="@+id/btnPrevPage"

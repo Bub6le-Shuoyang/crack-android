@@ -18,6 +18,16 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Check login status first
+        val sharedPref = getSharedPreferences("AppPrefs", android.content.Context.MODE_PRIVATE)
+        val token = sharedPref.getString("token", "") ?: ""
+        if (token.isNotEmpty()) {
+            startActivity(Intent(this, MainActivity::class.java))
+            finish()
+            return
+        }
+
         setContentView(R.layout.activity_login)
 
         viewModel = ViewModelProvider(this)[AuthViewModel::class.java]
