@@ -52,6 +52,14 @@ class LoginActivity : AppCompatActivity() {
                     is AuthState.Loading -> { }
                     is AuthState.Success -> {
                         Toast.makeText(this@LoginActivity, state.message, Toast.LENGTH_SHORT).show()
+                        
+                        // Save token
+                        val response = state.data as? com.example.monitor.network.LoginResponse
+                        response?.token?.let { token ->
+                            val sharedPref = getSharedPreferences("AppPrefs", android.content.Context.MODE_PRIVATE)
+                            sharedPref.edit().putString("token", token).apply()
+                        }
+
                         viewModel.resetState()
                         // 登录成功后跳转到主页面
                         startActivity(Intent(this@LoginActivity, MainActivity::class.java))
