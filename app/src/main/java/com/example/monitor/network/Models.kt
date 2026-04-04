@@ -221,13 +221,13 @@ data class VideoItem(
     val filePath: String,
     val fileSize: Long,
     val fileType: String,
-    val duration: Double,
-    val coverPath: String,
+    val duration: Double?,
+    val coverPath: String?,
     val status: Int,
     val isDetected: Int,
     val createdAt: String,
     val anomalyCount: Int?,
-    val anomalyFrames: Int?
+    val anomalyFrames: Any? // Since the backend returns either a number or a list, we use Any? to prevent parsing exceptions
 )
 
 data class VideoProgressResponse(

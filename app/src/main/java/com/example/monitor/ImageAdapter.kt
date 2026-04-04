@@ -35,9 +35,9 @@ class ImageAdapter(private val images: List<ImageItem>) :
         holder.tvFileName.text = item.fileName
         holder.tvDate.text = item.createdAt
 
-        val baseUrl = "http://10.0.2.2:7022"
+        val baseUrl = "http://127.0.0.1:7022"
         var imageUrl = if (item.filePath.startsWith("http")) item.filePath else baseUrl + item.filePath
-        imageUrl = imageUrl.replace("127.0.0.1", "10.0.2.2")
+        imageUrl = imageUrl.replace("10.60.22.66", "127.0.0.1").replace("10.0.2.2", "127.0.0.1")
 
         Glide.with(holder.itemView.context)
             .load(imageUrl)

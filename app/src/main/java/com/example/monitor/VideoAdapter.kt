@@ -38,8 +38,9 @@ class VideoAdapter(
         holder.tvDate.text = item.createdAt
 
         // Format duration
-        val minutes = (item.duration / 60).toInt()
-        val seconds = (item.duration % 60).toInt()
+        val safeDuration = item.duration ?: 0.0
+        val minutes = (safeDuration / 60).toInt()
+        val seconds = (safeDuration % 60).toInt()
         holder.tvDuration.text = String.format("%02d:%02d", minutes, seconds)
 
         // Status text
@@ -63,9 +64,10 @@ class VideoAdapter(
             }
         }
 
-        val baseUrl = "http://10.0.2.2:7022"
-        var coverUrl = if (item.coverPath.startsWith("http")) item.coverPath else baseUrl + item.coverPath
-        coverUrl = coverUrl.replace("127.0.0.1", "10.0.2.2")
+        val baseUrl = "http://127.0.0.1:7022"
+        val safeCoverPath = item.coverPath ?: ""
+        var coverUrl = if (safeCoverPath.startsWith("http")) safeCoverPath else baseUrl + safeCoverPath
+        coverUrl = coverUrl.replace("10.60.22.66", "127.0.0.1").replace("10.0.2.2", "127.0.0.1")
 
         Glide.with(holder.itemView.context)
             .load(coverUrl)

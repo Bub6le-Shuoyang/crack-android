@@ -92,9 +92,9 @@ class ImageDetailActivity : AppCompatActivity() {
                     if (response.isSuccessful && response.body()?.ok == true) {
                         val data = response.body()?.data
                         if (data != null) {
-                            val baseUrl = "http://10.0.2.2:7022" // Adjust base URL
+                            val baseUrl = "http://127.0.0.1:7022" // Adjust base URL
                             var url = if (data.accessUrl?.startsWith("http") == true) data.accessUrl else baseUrl + (data.accessUrl ?: data.filePath)
-                            url = url.replace("127.0.0.1", "10.0.2.2")
+                            url = url.replace("10.60.22.66", "127.0.0.1").replace("10.0.2.2", "127.0.0.1")
                             
                             Glide.with(this@ImageDetailActivity)
                                 .load(url)

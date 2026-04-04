@@ -90,9 +90,9 @@ class ProfileFragment : Fragment() {
 
                         val avatarUrl = data?.avatarUrl
                         if (!avatarUrl.isNullOrEmpty()) {
-                            val baseUrl = "http://10.0.2.2:7022"
+                            val baseUrl = "http://127.0.0.1:7022"
                             var finalUrl = if (avatarUrl.startsWith("http")) avatarUrl else baseUrl + avatarUrl
-                            finalUrl = finalUrl.replace("127.0.0.1", "10.0.2.2")
+                            finalUrl = finalUrl.replace("10.60.22.66", "127.0.0.1").replace("10.0.2.2", "127.0.0.1")
 
                             Glide.with(this@ProfileFragment)
                                 .load(finalUrl)
