@@ -8,6 +8,7 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.View
 import com.example.monitor.network.DetectionResult
+import com.example.monitor.utils.LabelUtils
 
 class BoundingBoxView @JvmOverloads constructor(
     context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
@@ -33,17 +34,6 @@ class BoundingBoxView @JvmOverloads constructor(
     private var scale: Float = 1f
     private var dx: Float = 0f
     private var dy: Float = 0f
-
-    private fun getMappedLabelAndColor(label: String): Pair<String, Int> {
-        return when (label.lowercase()) {
-            "p0" -> "纵向裂缝" to Color.RED
-            "p1" -> "横向裂缝" to Color.BLUE
-            "p2" -> "龟裂" to Color.GREEN
-            "p3" -> "坑洞" to Color.parseColor("#FFA500") // 橙色
-            "p4" -> "坑洞" to Color.parseColor("#FFA500") // 兼容P4
-            else -> label to Color.RED
-        }
-    }
 
     fun setResults(results: List<DetectionResult>, imageWidth: Float, imageHeight: Float) {
         this.results = results
@@ -96,8 +86,10 @@ class BoundingBoxView @JvmOverloads constructor(
 
             val rect = RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
             
-            val (mappedLabel, mappedColor) = getMappedLabelAndColor(result.label)
+            val (mappedLabel, mappedColor) = LabelUtils.getMappedLabelAndColor(result.label)
             paint.color = mappedColor
+            
+            canvas.drawRect(rect, paint)
             textPaint.color = mappedColor
             
             canvas.drawRect(rect, paint)

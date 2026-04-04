@@ -4,6 +4,7 @@ import android.media.MediaPlayer
 import android.os.Bundle
 import android.view.MenuItem
 import android.view.View
+import android.widget.Button
 import android.widget.MediaController
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -15,6 +16,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.monitor.network.AnomalyFrame
 import com.example.monitor.network.RetrofitClient
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -28,12 +31,15 @@ class VideoDetailActivity : AppCompatActivity() {
     private lateinit var videoView: VideoView
     private lateinit var boundingBoxView: BoundingBoxView
     private lateinit var progressBar: ProgressBar
+    private lateinit var btnStartDetect: Button
     private lateinit var rvAnomalies: RecyclerView
     private lateinit var tvAnomalyTitle: TextView
     private lateinit var toolbar: Toolbar
 
     private var videoId: Long = -1
     private var videoPath: String = ""
+    private var isDetected: Int = 0
+    private var anomalyFramesJson: String? = null
     private var anomalyFrames: List<AnomalyFrame> = emptyList()
     
     private var videoWidth = 1f
@@ -46,10 +52,19 @@ class VideoDetailActivity : AppCompatActivity() {
 
         videoId = intent.getLongExtra("videoId", -1)
         videoPath = intent.getStringExtra("videoPath") ?: ""
+        isDetected = intent.getIntExtra("isDetected", 0)
+        anomalyFramesJson = intent.getStringExtra("anomalyFramesJson")
 
         initViews()
         setupVideoView()
-        fetchVideoDetails()
+        
+        if (isDetected == 1) {
+            btnStartDetect.visibility = View.GONE
+            loadResultsFromJson()
+        } else {
+            btnStartDetect.visibility = View.VISIBLE
+            tvAnomalyTitle.text = "视频尚未检测"
+        }
     }
 
     private fun initViews() {
@@ -60,10 +75,15 @@ class VideoDetailActivity : AppCompatActivity() {
         videoView = findViewById(R.id.videoView)
         boundingBoxView = findViewById(R.id.boundingBoxView)
         progressBar = findViewById(R.id.videoProgressBar)
+        btnStartDetect = findViewById(R.id.btnStartDetect)
         rvAnomalies = findViewById(R.id.rvAnomalies)
         tvAnomalyTitle = findViewById(R.id.tvAnomalyTitle)
         
         rvAnomalies.layoutManager = LinearLayoutManager(this)
+        
+        btnStartDetect.setOnClickListener {
+            startVideoDetection()
+        }
     }
 
     private fun setupVideoView() {
@@ -91,6 +111,111 @@ class VideoDetailActivity : AppCompatActivity() {
         videoView.setOnErrorListener { _, _, _ ->
             Toast.makeText(this, "视频加载失败", Toast.LENGTH_SHORT).show()
             true
+        }
+    }
+
+    private fun loadResultsFromJson() {
+        if (!anomalyFramesJson.isNullOrEmpty()) {
+            try {
+                val gson = Gson()
+                val listType = object : TypeToken<List<AnomalyFrame>>() {}.type
+                anomalyFrames = gson.fromJson(anomalyFramesJson, listType)
+                tvAnomalyTitle.text = "检测到的异常片段 (${anomalyFrames.size} 处)"
+                rvAnomalies.adapter = AnomalyFrameAdapter(anomalyFrames) { frame ->
+                    seekToFrame(frame)
+                }
+            } catch (e: Exception) {
+                tvAnomalyTitle.text = "解析异常数据失败"
+                e.printStackTrace()
+            }
+        } else {
+            // fallback: fetch from API if JSON was not passed
+            fetchVideoDetails()
+        }
+    }
+
+    private fun startVideoDetection() {
+        if (videoId == -1L) return
+        
+        btnStartDetect.isEnabled = false
+        btnStartDetect.text = "请求检测中..."
+        progressBar.visibility = View.VISIBLE
+        
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val response = RetrofitClient.apiService.detectVideo(videoId)
+                withContext(Dispatchers.Main) {
+                    if (response.isSuccessful && response.body()?.ok == true) {
+                        btnStartDetect.visibility = View.GONE
+                        tvAnomalyTitle.text = "已加入检测队列，正在检测..."
+                        pollVideoProgress()
+                    } else {
+                        btnStartDetect.isEnabled = true
+                        btnStartDetect.text = "重新检测"
+                        progressBar.visibility = View.GONE
+                        Toast.makeText(this@VideoDetailActivity, "开始检测失败", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    btnStartDetect.isEnabled = true
+                    btnStartDetect.text = "重新检测"
+                    progressBar.visibility = View.GONE
+                    Toast.makeText(this@VideoDetailActivity, "网络错误: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun pollVideoProgress() {
+        CoroutineScope(Dispatchers.IO).launch {
+            var isFinished = false
+            while (!isFinished && isActive) {
+                delay(3000) // Poll every 3 seconds
+                try {
+                    val response = RetrofitClient.apiService.getVideoProgress(videoId)
+                    if (response.isSuccessful) {
+                        val body = response.body()
+                        if (body != null && body.ok == true) {
+                            val progress = body.progress ?: 0
+                            withContext(Dispatchers.Main) {
+                                tvAnomalyTitle.text = "正在检测: $progress%"
+                            }
+                            if (progress == 100) {
+                                isFinished = true
+                                withContext(Dispatchers.Main) {
+                                    progressBar.visibility = View.GONE
+                                    Toast.makeText(this@VideoDetailActivity, "检测完成", Toast.LENGTH_SHORT).show()
+                                    val data = body.data
+                                    if (data != null) {
+                                        anomalyFrames = data.anomalyFrames
+                                        tvAnomalyTitle.text = "检测到的异常片段 (${anomalyFrames.size} 处)"
+                                        rvAnomalies.adapter = AnomalyFrameAdapter(anomalyFrames) { frame ->
+                                            seekToFrame(frame)
+                                        }
+                                        // Update local JSON so it stays cached
+                                        val gson = Gson()
+                                        anomalyFramesJson = gson.toJson(anomalyFrames)
+                                    } else {
+                                        tvAnomalyTitle.text = "获取异常数据失败"
+                                    }
+                                }
+                            } else if (progress == -1) {
+                                isFinished = true
+                                withContext(Dispatchers.Main) {
+                                    progressBar.visibility = View.GONE
+                                    tvAnomalyTitle.text = "检测失败"
+                                    btnStartDetect.visibility = View.VISIBLE
+                                    btnStartDetect.isEnabled = true
+                                    btnStartDetect.text = "重新检测"
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Ignore transient errors
+                }
+            }
         }
     }
 

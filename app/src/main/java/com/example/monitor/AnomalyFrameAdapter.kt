@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.monitor.network.AnomalyFrame
+import com.example.monitor.utils.LabelUtils
 
 class AnomalyFrameAdapter(
     private val anomalyFrames: List<AnomalyFrame>,
@@ -30,14 +31,7 @@ class AnomalyFrameAdapter(
         val details = StringBuilder()
         details.append("检测到 ${frame.detections.size} 处异常:\n")
         frame.detections.forEach { det ->
-            val mappedLabel = when (det.label.lowercase()) {
-                "p0" -> "纵向裂缝"
-                "p1" -> "横向裂缝"
-                "p2" -> "龟裂"
-                "p3" -> "坑洞"
-                "p4" -> "坑洞"
-                else -> det.label
-            }
+            val mappedLabel = LabelUtils.getMappedLabel(det.label)
             details.append("- $mappedLabel (置信度: ${String.format("%.2f", det.score)})\n")
         }
         holder.tvDetails.text = details.toString().trim()

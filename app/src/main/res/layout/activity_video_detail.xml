@@ -41,6 +41,14 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:visibility="gone" />
+            
+        <Button
+            android:id="@+id/btnStartDetect"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="开始检测"
+            android:visibility="gone" />
     </FrameLayout>
 
     <!-- 底部异常列表 -->

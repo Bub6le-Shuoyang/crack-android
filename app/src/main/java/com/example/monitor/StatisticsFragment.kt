@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.example.monitor.network.RetrofitClient
+import com.example.monitor.utils.LabelUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -81,10 +82,13 @@ class StatisticsFragment : Fragment() {
                                         setPadding(0, 8, 0, 8)
                                     }
                                     
+                                    val mappedLabel = LabelUtils.getMappedLabel(type.label)
+                                    val mappedColor = LabelUtils.getMappedColor(type.label)
+                                    
                                     val labelView = TextView(context).apply {
-                                        text = type.label
+                                        text = mappedLabel
                                         layoutParams = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f)
-                                        setTextColor(Color.DKGRAY)
+                                        setTextColor(mappedColor)
                                     }
                                     
                                     val countView = TextView(context).apply {

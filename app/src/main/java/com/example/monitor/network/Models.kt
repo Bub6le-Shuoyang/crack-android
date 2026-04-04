@@ -106,7 +106,27 @@ data class ImageDetailData(
     val isDetected: Boolean,
     val detectionDate: String?,
     val modelName: String?,
-    val results: List<DetectionResult>?
+    val results: List<DetectionResult>?,
+    val location: LocationData? = null
+)
+
+data class LocationData(
+    val latitude: Double,
+    val longitude: Double,
+    val address: String?
+)
+
+data class LocationRequest(
+    val imageId: Long,
+    val latitude: Double,
+    val longitude: Double,
+    val address: String?
+)
+
+data class LocationResponse(
+    val ok: Boolean?,
+    val message: String?,
+    val data: LocationData?
 )
 
 data class DetectionResult(
@@ -121,6 +141,12 @@ data class DetectionResult(
 
 data class DetectBatchRequest(
     val imageIds: List<Long>
+)
+
+data class DetectBatchResponse(
+    val ok: Boolean?,
+    val message: String?,
+    val data: Map<String, List<DetectionResult>>?
 )
 
 data class BatchDeleteRequest(

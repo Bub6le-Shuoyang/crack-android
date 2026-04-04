@@ -193,78 +193,24 @@ class VideosFragment : Fragment() {
     }
 
     private fun handleVideoClick(item: VideoItem) {
-        if (item.isDetected == 0) {
-            AlertDialog.Builder(requireContext())
-                .setTitle("视频未检测")
-                .setMessage("是否立即进行视频异常检测？")
-                .setPositiveButton("检测") { _, _ -> startVideoDetection(item.videoId) }
-                .setNegativeButton("取消", null)
-                .show()
-        } else {
-            val intent = Intent(requireContext(), VideoDetailActivity::class.java).apply {
-                putExtra("videoId", item.videoId)
-                putExtra("videoPath", item.filePath)
+        val intent = Intent(requireContext(), VideoDetailActivity::class.java).apply {
+            putExtra("videoId", item.videoId)
+            putExtra("videoPath", item.filePath)
+            putExtra("isDetected", item.isDetected)
+            if (item.isDetected == 1 && item.anomalyFrames != null) {
+                val gson = com.google.gson.Gson()
+                putExtra("anomalyFramesJson", gson.toJson(item.anomalyFrames))
             }
-            startActivity(intent)
         }
+        startActivity(intent)
     }
 
     private fun startVideoDetection(videoId: Long) {
-        progressBar.visibility = View.VISIBLE
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = RetrofitClient.apiService.detectVideo(videoId)
-                withContext(Dispatchers.Main) {
-                    progressBar.visibility = View.GONE
-                    if (response.isSuccessful && response.body()?.ok == true) {
-                        Toast.makeText(context, "已加入检测队列，开始检测...", Toast.LENGTH_SHORT).show()
-                        pollVideoProgress(videoId)
-                    } else {
-                        Toast.makeText(context, "开始检测失败", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    progressBar.visibility = View.GONE
-                    Toast.makeText(context, "网络错误", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        // Moved to VideoDetailActivity
     }
 
     private fun pollVideoProgress(videoId: Long) {
-        CoroutineScope(Dispatchers.IO).launch {
-            var isFinished = false
-            while (!isFinished) {
-                delay(3000) // Poll every 3 seconds
-                try {
-                    val response = RetrofitClient.apiService.getVideoProgress(videoId)
-                    if (response.isSuccessful) {
-                        val body = response.body()
-                        if (body != null && body.ok == true) {
-                            val progress = body.progress ?: 0
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "检测进度: $progress%", Toast.LENGTH_SHORT).show()
-                            }
-                            if (progress == 100) {
-                                isFinished = true
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(context, "检测完成", Toast.LENGTH_SHORT).show()
-                                    fetchVideos()
-                                }
-                            } else if (progress == -1) {
-                                isFinished = true
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(context, "检测失败", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    // Ignore transient errors
-                }
-            }
-        }
+        // Moved to VideoDetailActivity
     }
 
     private var currentVideoUri: android.net.Uri? = null

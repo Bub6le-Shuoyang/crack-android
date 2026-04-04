@@ -1,5 +1,11 @@
 package com.example.monitor
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import android.location.Location
+import android.location.LocationManager
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -255,12 +261,68 @@ class ImagesFragment : Fragment() {
             .setTitle("图像检测")
             .setItems(options) { _, which ->
                 if (which == 0) {
-                    takePhoto()
+                    checkLocationAndTakePhoto()
                 } else {
                     pickImageFromGallery()
                 }
             }
             .show()
+    }
+
+    private var currentLocation: Location? = null
+
+    private fun checkLocationAndTakePhoto() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION), TAKE_PHOTO_REQUEST_LOCATION)
+        } else {
+            fetchLocationAndStartCamera()
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == TAKE_PHOTO_REQUEST_LOCATION) {
+            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                fetchLocationAndStartCamera()
+            } else {
+                Toast.makeText(context, "未授权位置信息，将不记录位置", Toast.LENGTH_SHORT).show()
+                currentLocation = null
+                takePhoto()
+            }
+        }
+    }
+
+    private fun fetchLocationAndStartCamera() {
+        try {
+            val locationManager = requireContext().getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            val isGpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+            val isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+
+            if (isGpsEnabled || isNetworkEnabled) {
+                val provider = if (isGpsEnabled) LocationManager.GPS_PROVIDER else LocationManager.NETWORK_PROVIDER
+                currentLocation = locationManager.getLastKnownLocation(provider)
+                if (currentLocation == null) {
+                    val fallbackProvider = if (isGpsEnabled) LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
+                    currentLocation = locationManager.getLastKnownLocation(fallbackProvider)
+                }
+                
+                // Request a fresh update asynchronously. By the time user takes a photo, we should have a location.
+                @Suppress("DEPRECATION", "MissingPermission")
+                locationManager.requestSingleUpdate(provider, object : android.location.LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        currentLocation = location
+                    }
+                    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+                    override fun onProviderEnabled(provider: String) {}
+                    override fun onProviderDisabled(provider: String) {}
+                }, android.os.Looper.getMainLooper())
+            }
+        } catch (e: SecurityException) {
+            currentLocation = null
+        } catch (e: Exception) {
+            // Ignore
+        }
+        takePhoto()
     }
 
     private fun takePhoto() {
@@ -327,6 +389,11 @@ class ImagesFragment : Fragment() {
                     withContext(Dispatchers.Main) {
                         progressBar.visibility = View.GONE
                         if (response.isSuccessful && response.body()?.ok == true) {
+                            val data = response.body()?.data
+                            if (data != null && currentLocation != null) {
+                                saveImageLocation(data.imageId, currentLocation!!.latitude, currentLocation!!.longitude)
+                            }
+                            currentLocation = null // reset location
                             Toast.makeText(context, "上传成功", Toast.LENGTH_SHORT).show()
                             fetchImages() // Refresh the list
                         } else {
@@ -348,8 +415,22 @@ class ImagesFragment : Fragment() {
         }
     }
 
+    private fun saveImageLocation(imageId: Long, lat: Double, lon: Double) {
+        val sharedPref = requireActivity().getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
+        val token = sharedPref.getString("token", "") ?: ""
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val req = com.example.monitor.network.LocationRequest(imageId, lat, lon, "已获取坐标位置")
+                RetrofitClient.apiService.saveLocation("Bearer $token", req)
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
+    }
+
     companion object {
         private const val PICK_IMAGE_REQUEST = 1001
         private const val TAKE_PHOTO_REQUEST = 1002
+        private const val TAKE_PHOTO_REQUEST_LOCATION = 1003
     }
 }

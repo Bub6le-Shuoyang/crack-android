@@ -62,10 +62,22 @@ interface ApiService {
         @Body request: BatchDeleteRequest
     ): Response<BatchDeleteResponse>
 
+    @POST("/api/location/save")
+    suspend fun saveLocation(
+        @Header("Authorization") token: String,
+        @Body request: LocationRequest
+    ): Response<BaseResponse>
+
+    @GET("/api/location/get/{imageId}")
+    suspend fun getLocation(
+        @Header("Authorization") token: String,
+        @Path("imageId") imageId: Long
+    ): Response<LocationResponse>
+
     @POST("/model/detectBatch")
     suspend fun detectBatch(
         @Body request: DetectBatchRequest
-    ): Response<Map<String, List<DetectionResult>>>
+    ): Response<DetectBatchResponse>
 
     @GET("/api/user/info")
     suspend fun getUserInfo(

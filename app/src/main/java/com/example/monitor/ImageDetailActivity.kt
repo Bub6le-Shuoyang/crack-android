@@ -12,8 +12,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.example.monitor.network.RetrofitClient
+import com.example.monitor.utils.LabelUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -86,7 +88,12 @@ class ImageDetailActivity : AppCompatActivity() {
         progressBar.visibility = View.VISIBLE
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val response = RetrofitClient.apiService.getImageDetail("Bearer $token", imageId)
+                val detailDeferred = async { RetrofitClient.apiService.getImageDetail("Bearer $token", imageId) }
+                val locationDeferred = async { RetrofitClient.apiService.getLocation("Bearer $token", imageId) }
+
+                val response = detailDeferred.await()
+                val locationResponse = try { locationDeferred.await() } catch(e: Exception) { null }
+                
                 withContext(Dispatchers.Main) {
                     progressBar.visibility = View.GONE
                     if (response.isSuccessful && response.body()?.ok == true) {
@@ -102,6 +109,16 @@ class ImageDetailActivity : AppCompatActivity() {
 
                             val sb = StringBuilder()
                             sb.append("文件名: ${data.fileName}\n")
+                            
+                            if (locationResponse != null && locationResponse.isSuccessful && locationResponse.body()?.ok == true) {
+                                val locData = locationResponse.body()?.data
+                                if (locData != null) {
+                                    sb.append("位置: 纬度 ${String.format("%.6f", locData.latitude)}, 经度 ${String.format("%.6f", locData.longitude)}\n")
+                                }
+                            } else {
+                                sb.append("位置: 暂无位置信息\n")
+                            }
+
                             sb.append("是否检测: ${if (data.isDetected) "是" else "否"}\n")
                             
                             if (data.isDetected) {
@@ -112,14 +129,7 @@ class ImageDetailActivity : AppCompatActivity() {
                                 } else {
                                     sb.append("检测结果:\n")
                                     data.results.forEach { res ->
-                                        val mappedLabel = when (res.label.lowercase()) {
-                                            "p0" -> "纵向裂缝"
-                                            "p1" -> "横向裂缝"
-                                            "p2" -> "龟裂"
-                                            "p3" -> "坑洞"
-                                            "p4" -> "坑洞"
-                                            else -> res.label
-                                        }
+                                        val mappedLabel = LabelUtils.getMappedLabel(res.label)
                                         sb.append("- $mappedLabel (置信度: ${res.score})\n")
                                     }
                                     // Pass results to draw bounding boxes
