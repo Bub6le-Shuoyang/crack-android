@@ -5,13 +5,41 @@
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
         <item name="colorSecondary">@color/secondary_color</item>
-        <item name="colorOnSecondary">@color/black</item>
+        <item name="colorOnSecondary">@color/white</item>
         <!-- Background colors -->
-        <item name="android:windowBackground">@color/white</item>
+        <item name="android:windowBackground">@color/bg_light</item>
         <item name="colorSurface">@color/white</item>
-        <item name="colorOnSurface">@color/black</item>
+        <item name="colorOnSurface">@color/text_primary</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/white</item>
+        <item name="android:statusBarColor">@color/bg_light</item>
         <item name="android:windowLightStatusBar">true</item>
+
+        <!-- Custom styles for modernization -->
+        <item name="materialButtonStyle">@style/Widget.Monitor.Button</item>
+        <item name="textInputStyle">@style/Widget.Monitor.TextInputLayout</item>
+    </style>
+
+    <!-- Gradient Button Style -->
+    <style name="Widget.Monitor.Button" parent="Widget.Material3.Button">
+        <item name="android:background">@drawable/bg_gradient_button</item>
+        <item name="backgroundTint">@null</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:letterSpacing">0.05</item>
+        <item name="cornerRadius">8dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="elevation">4dp</item>
+    </style>
+
+    <!-- Text Input Style -->
+    <style name="Widget.Monitor.TextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">8dp</item>
+        <item name="boxCornerRadiusTopEnd">8dp</item>
+        <item name="boxCornerRadiusBottomStart">8dp</item>
+        <item name="boxCornerRadiusBottomEnd">8dp</item>
+        <item name="boxStrokeColor">@color/primary_color</item>
+        <item name="hintTextColor">@color/primary_color</item>
+        <item name="android:textColorHint">@color/text_hint</item>
     </style>
 </resources>
