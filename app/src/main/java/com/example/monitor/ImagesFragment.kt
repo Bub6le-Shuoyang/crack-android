@@ -247,7 +247,40 @@ class ImagesFragment : Fragment() {
         }
     }
 
+    private var currentPhotoUri: android.net.Uri? = null
+
     fun triggerImageUpload() {
+        val options = arrayOf("拍照", "从相册选择")
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("图像检测")
+            .setItems(options) { _, which ->
+                if (which == 0) {
+                    takePhoto()
+                } else {
+                    pickImageFromGallery()
+                }
+            }
+            .show()
+    }
+
+    private fun takePhoto() {
+        val intent = Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE)
+        val photoFile = java.io.File(requireContext().externalCacheDir, "temp_img_${System.currentTimeMillis()}.jpg")
+        currentPhotoUri = androidx.core.content.FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            photoFile
+        )
+        intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, currentPhotoUri)
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        try {
+            startActivityForResult(intent, TAKE_PHOTO_REQUEST)
+        } catch (e: Exception) {
+            Toast.makeText(context, "无法打开相机", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun pickImageFromGallery() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         startActivityForResult(intent, PICK_IMAGE_REQUEST)
@@ -255,9 +288,15 @@ class ImagesFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == android.app.Activity.RESULT_OK) {
-            data?.data?.let { uri ->
-                uploadImage(uri)
+        if (resultCode == android.app.Activity.RESULT_OK) {
+            if (requestCode == PICK_IMAGE_REQUEST) {
+                data?.data?.let { uri ->
+                    uploadImage(uri)
+                }
+            } else if (requestCode == TAKE_PHOTO_REQUEST) {
+                currentPhotoUri?.let { uri ->
+                    uploadImage(uri)
+                }
             }
         }
     }
@@ -311,5 +350,6 @@ class ImagesFragment : Fragment() {
 
     companion object {
         private const val PICK_IMAGE_REQUEST = 1001
+        private const val TAKE_PHOTO_REQUEST = 1002
     }
 }

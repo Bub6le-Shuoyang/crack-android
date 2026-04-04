@@ -3,11 +3,11 @@
     <item
         android:id="@+id/nav_images"
         android:icon="@drawable/ic_image"
-        android:title="上传图像" />
+        android:title="图像检测" />
     <item
         android:id="@+id/nav_videos"
         android:icon="@drawable/ic_video"
-        android:title="上传视频" />
+        android:title="视频检测" />
     <item
         android:id="@+id/nav_empty"
         android:title=""

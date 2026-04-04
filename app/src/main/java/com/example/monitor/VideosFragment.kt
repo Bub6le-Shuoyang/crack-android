@@ -270,7 +270,40 @@ class VideosFragment : Fragment() {
         }
     }
 
+    private var currentVideoUri: android.net.Uri? = null
+
     fun triggerVideoUpload() {
+        val options = arrayOf("录像", "从相册选择")
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("视频检测")
+            .setItems(options) { _, which ->
+                if (which == 0) {
+                    recordVideo()
+                } else {
+                    pickVideoFromGallery()
+                }
+            }
+            .show()
+    }
+
+    private fun recordVideo() {
+        val intent = Intent(android.provider.MediaStore.ACTION_VIDEO_CAPTURE)
+        val videoFile = java.io.File(requireContext().externalCacheDir, "temp_vid_${System.currentTimeMillis()}.mp4")
+        currentVideoUri = androidx.core.content.FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            videoFile
+        )
+        intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, currentVideoUri)
+        intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+        try {
+            startActivityForResult(intent, RECORD_VIDEO_REQUEST)
+        } catch (e: Exception) {
+            Toast.makeText(context, "无法打开相机", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun pickVideoFromGallery() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "video/*"
         startActivityForResult(intent, PICK_VIDEO_REQUEST)
@@ -278,9 +311,15 @@ class VideosFragment : Fragment() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == PICK_VIDEO_REQUEST && resultCode == android.app.Activity.RESULT_OK) {
-            data?.data?.let { uri ->
-                uploadVideo(uri)
+        if (resultCode == android.app.Activity.RESULT_OK) {
+            if (requestCode == PICK_VIDEO_REQUEST) {
+                data?.data?.let { uri ->
+                    uploadVideo(uri)
+                }
+            } else if (requestCode == RECORD_VIDEO_REQUEST) {
+                currentVideoUri?.let { uri ->
+                    uploadVideo(uri)
+                }
             }
         }
     }
@@ -329,5 +368,6 @@ class VideosFragment : Fragment() {
 
     companion object {
         private const val PICK_VIDEO_REQUEST = 2001
+        private const val RECORD_VIDEO_REQUEST = 2002
     }
 }
