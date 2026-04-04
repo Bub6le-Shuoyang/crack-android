@@ -14,13 +14,11 @@ class BoundingBoxView @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
 
     private val paint = Paint().apply {
-        color = Color.RED
         style = Paint.Style.STROKE
         strokeWidth = 5f
     }
 
     private val textPaint = Paint().apply {
-        color = Color.RED
         textSize = 40f
         style = Paint.Style.FILL
     }
@@ -35,6 +33,17 @@ class BoundingBoxView @JvmOverloads constructor(
     private var scale: Float = 1f
     private var dx: Float = 0f
     private var dy: Float = 0f
+
+    private fun getMappedLabelAndColor(label: String): Pair<String, Int> {
+        return when (label.lowercase()) {
+            "p0" -> "纵向裂缝" to Color.RED
+            "p1" -> "横向裂缝" to Color.BLUE
+            "p2" -> "龟裂" to Color.GREEN
+            "p3" -> "坑洞" to Color.parseColor("#FFA500") // 橙色
+            "p4" -> "坑洞" to Color.parseColor("#FFA500") // 兼容P4
+            else -> label to Color.RED
+        }
+    }
 
     fun setResults(results: List<DetectionResult>, imageWidth: Float, imageHeight: Float) {
         this.results = results
@@ -86,10 +95,15 @@ class BoundingBoxView @JvmOverloads constructor(
             val scaledBottom = bottom * scale + dy
 
             val rect = RectF(scaledLeft, scaledTop, scaledRight, scaledBottom)
+            
+            val (mappedLabel, mappedColor) = getMappedLabelAndColor(result.label)
+            paint.color = mappedColor
+            textPaint.color = mappedColor
+            
             canvas.drawRect(rect, paint)
             
-            val label = "${result.label} ${(result.score * 100).toInt()}%"
-            canvas.drawText(label, scaledLeft, scaledTop - 10f, textPaint)
+            val labelText = "$mappedLabel ${(result.score * 100).toInt()}%"
+            canvas.drawText(labelText, scaledLeft, scaledTop - 10f, textPaint)
         }
     }
 }

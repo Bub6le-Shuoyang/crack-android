@@ -201,14 +201,11 @@ class VideosFragment : Fragment() {
                 .setNegativeButton("取消", null)
                 .show()
         } else {
-            val resultMsg = if (item.anomalyCount ?: 0 > 0) {
-                "检测完成，发现 ${item.anomalyCount} 处异常"
-            } else {
-                "检测完成，正常"
+            val intent = Intent(requireContext(), VideoDetailActivity::class.java).apply {
+                putExtra("videoId", item.videoId)
+                putExtra("videoPath", item.filePath)
             }
-            Toast.makeText(context, resultMsg, Toast.LENGTH_SHORT).show()
-            // If there's a detailed view for video, we can navigate to it. 
-            // For now just show toast since we don't have VideoDetailActivity.
+            startActivity(intent)
         }
     }
 

@@ -46,6 +46,14 @@ class ImageAdapter(private val images: List<ImageItem>) :
         holder.cbSelect.visibility = if (isSelectionMode) View.VISIBLE else View.GONE
         holder.cbSelect.isChecked = selectedItems.contains(item.id)
 
+        holder.cbSelect.setOnClickListener {
+            if (holder.cbSelect.isChecked) {
+                selectedItems.add(item.id)
+            } else {
+                selectedItems.remove(item.id)
+            }
+        }
+
         holder.itemView.setOnClickListener {
             if (isSelectionMode) {
                 if (selectedItems.contains(item.id)) {
@@ -59,14 +67,6 @@ class ImageAdapter(private val images: List<ImageItem>) :
                 val intent = Intent(holder.itemView.context, ImageDetailActivity::class.java)
                 intent.putExtra("IMAGE_ID", item.id)
                 holder.itemView.context.startActivity(intent)
-            }
-        }
-        
-        holder.cbSelect.setOnClickListener {
-            if (holder.cbSelect.isChecked) {
-                selectedItems.add(item.id)
-            } else {
-                selectedItems.remove(item.id)
             }
         }
     }

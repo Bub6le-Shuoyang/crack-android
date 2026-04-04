@@ -1,16 +1,17 @@
 [versions]
-agp = "9.0.0"
-coreKtx = "1.10.1"
+agp = "8.4.0" # 根据实际情况保留，如果之前是 9.0.0 也可以保持不变
+kotlin = "1.9.23"
+coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
-appcompat = "1.6.1"
-material = "1.10.0"
-activity = "1.8.0"
+appcompat = "1.7.0"
+material = "1.12.0"
+activity = "1.9.1"
 constraintlayout = "2.1.4"
-retrofit = "2.9.0"
-coroutines = "1.7.3"
-lifecycle = "2.6.2"
+retrofit = "2.11.0"
+coroutines = "1.9.0"
+lifecycle = "2.8.4"
 glide = "4.16.0"
 
 [libraries]
@@ -31,4 +32,5 @@ glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "gl
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 

@@ -112,7 +112,15 @@ class ImageDetailActivity : AppCompatActivity() {
                                 } else {
                                     sb.append("检测结果:\n")
                                     data.results.forEach { res ->
-                                        sb.append("- ${res.label} (置信度: ${res.score})\n")
+                                        val mappedLabel = when (res.label.lowercase()) {
+                                            "p0" -> "纵向裂缝"
+                                            "p1" -> "横向裂缝"
+                                            "p2" -> "龟裂"
+                                            "p3" -> "坑洞"
+                                            "p4" -> "坑洞"
+                                            else -> res.label
+                                        }
+                                        sb.append("- $mappedLabel (置信度: ${res.score})\n")
                                     }
                                     // Pass results to draw bounding boxes
                                     boundingBoxView.setResults(data.results, data.width.toFloat(), data.height.toFloat())
